@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/index.ts localhost 3000",
+    "dev": "nodemon ./src/index.ts localhost 3008",
     "build": "npm i"
   },
   "keywords": [],

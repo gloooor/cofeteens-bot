@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
     bot.stop("Stoppp");
     return res.json({ bot: "stopped" });
   })
-  .listen(3000, () => {
+  .listen(3008, () => {
     console.log("Server started");
     bot.launch();
   });

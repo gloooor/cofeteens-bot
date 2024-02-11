@@ -1,4 +1,5 @@
 import axios from 'axios'
+import fs from 'fs';
 
 import { bot } from '../bot'
 import { BOT_TOKEN, CHAT_ID } from '../config'
@@ -12,6 +13,17 @@ bot.on("message", async (ctx) => {
 
     const chat = ctx.chat as { first_name: string, last_name: string, username: string}
     const { username, first_name, last_name } = chat
+
+    fs.readFile('src/logs.json', 'utf8', function readFileCallback(err, data){
+      if (err) {
+          console.log(err);
+      } else {
+        const log = {[`@${username}(${first_name} ${last_name})`]: message, chatId}
+        const logs = JSON.parse(data);
+        const newLogs = [...logs, log]
+        const newJson = JSON.stringify(newLogs);
+      fs.writeFile('src/logs.json', newJson, 'utf8', () => console.log(newJson));
+    }});
 
     const { isOther = false, isSettling = false} = getState(chatId);
 
