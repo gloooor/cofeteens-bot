@@ -1,7 +1,7 @@
 import { bot } from '../bot'
 import { getMainMenu, getScheduleMenu } from '../keyboards'
 
-bot.hears("расписание", async (ctx) => {
+bot.hears("расписание 🗓", async (ctx) => {
   await ctx.reply("Выбери день :)", getScheduleMenu());
 })
 .hears("пятничка", async (ctx) => {
