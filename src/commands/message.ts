@@ -1,8 +1,6 @@
-import axios from 'axios'
 import fs from 'fs';
 
 import { bot } from '../bot'
-import { BOT_TOKEN, CHAT_ID } from '../config'
 import { getMainMenu } from '../keyboards'
 import { setState, getState } from "../state";
 import settling from '../settling.json'
@@ -11,47 +9,21 @@ bot.on("message", async (ctx) => {
     const chatId = ctx.chat.id;
     const message = (ctx.update.message as { text: string }).text;
 
-    const chat = ctx.chat as { first_name: string, last_name: string, username: string}
-    const { username, first_name, last_name } = chat
-
-    fs.readFile('src/logs.json', 'utf8', function readFileCallback(err, data){
-      if (err) {
-          console.log(err);
-      } else {
-        const log = {[`@${username}(${first_name} ${last_name})`]: message, chatId}
-        const logs = JSON.parse(data);
-        const newLogs = [...logs, log]
-        const newJson = JSON.stringify(newLogs);
-      fs.writeFile('src/logs.json', newJson, 'utf8', () => console.log(newJson));
-    }});
-
-    const { isOther = false, isSettling = false} = getState(chatId);
+    const { isSettling = false} = getState(chatId);
 
     if (isSettling) {
       setState(ctx.chat.id, {
         isSettling: false,
       });
       
-      const isSettled = Object.entries(settling).filter(([name]) => name === message)[0]
+      const isSettled = Object.entries(settling).filter(([name]) => name.includes(message))[0]
       
       if (isSettled) {
         const [name, info] = isSettled
-        const {address, contact} = info
-        ctx.reply(`Отлично, ${name}, адрес твоего пристанища - ${address}. Обязательно свяжись с сопровождающим тебя человечком заранее, чтобы обсудить детали. Вот контакт: ${contact}, удачи!`, getMainMenu());
+        ctx.reply(`Отлично, ${name}, вот контакт человека, который тебя примет: ${info}. Обязательно свяжись с сопровождающим тебя человечком заранее, чтобы обсудить детали, удачи!`, getMainMenu());
       } else {
-        await ctx.reply(`Извини, я не нашел тебя в базе, но не переживай, сейчас я перенаправлю сообщение реальным людям и они обязательно тебе напишут в ближайшее время)`, getMainMenu());
-        const errorMsg = `У @${username}(${first_name} ${last_name}) проблемки с рассленением, свяжитесь с ним пожалуйста`
-        axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&parse_mode=html&text=${encodeURI(errorMsg)}`);
+        await ctx.reply(`Извини, я не нашел тебя в базе, но не переживай, найди кого-нибудь с бейджиком и они тебе обязательно помогут))`, getMainMenu());
       }
-    } else if (isOther) {
-      setState(ctx.chat.id, {
-        isOther: false,
-      });
-
-      ctx.reply(`Окей, я отправил твое сообщение, с тобой скоро свяжуться :)`, getMainMenu());
-      const questionMsg = `Сообщение от @${username}(${first_name} ${last_name}): ${message}`
-      axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&parse_mode=html&text=${encodeURI(questionMsg)}`);
-      
     } else {
       ctx.reply(`Извини, я еще не такой умный чтобы понять что ты от меня хочешь.. Воспользуйся пунктами меню...`, getMainMenu());
     }
